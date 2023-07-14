@@ -1,0 +1,6 @@
+﻿::deep .cell{
+    aspect-ratio:1/1;
+    height:50px;
+    border:solid 2px black;
+}
+

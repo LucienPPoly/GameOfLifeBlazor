@@ -1,0 +1,85 @@
+﻿@page "/game"
+
+<h3>Game Of Life</h3>
+<table style="height:80vh;aspect-ratio:1/1">
+	@{
+		for (int i = 0; i < SIZE; i++)
+		{
+			<tr>
+				@{
+					for (int j = 0; j < SIZE; j++)
+					{
+						<td style="padding:0px;">
+							<Cell i=i j=j @ref="cell"></Cell>
+						</td>
+					}
+				}
+			</tr>
+		}
+	}
+</table>
+
+<button @onclick="Reset">Reset</button>
+<button @onclick="@Run">Run</button>
+<button @onclick="() => cancellationTokenSource?.Cancel()">Stop</button>
+
+@code {
+	private const int SIZE = 30;
+
+	Cell cell { set => cells[value.i,value.j]=value; }
+
+	public Cell[,] cells = new Cell[SIZE, SIZE];
+
+	bool running = true;
+
+	private void Reset()
+	{
+		for (int i = 0; i < SIZE; i++)
+		{
+			for (int j = 0; j < SIZE; j++)
+			{
+				cells[i, j].setDead();
+			}
+		}
+	}
+
+	private void CalculNext()
+	{
+		for (int i = 0; i < SIZE; i++)
+		{
+			for (int j = 0; j < SIZE; j++)
+			{
+				cells[i, j].calculatewillLive(cells);
+			}
+		}
+	}
+
+	private void UpdateState()
+	{
+		for (int i = 0; i < SIZE; i++)
+		{
+			for (int j = 0; j < SIZE; j++)
+			{
+				cells[i, j].nextStep();
+			}
+		}
+	}
+
+	private CancellationTokenSource cancellationTokenSource;
+
+	private void Run()
+	{
+		cancellationTokenSource = new CancellationTokenSource();
+
+		Task.Run(async () =>
+		{
+			while (!cancellationTokenSource.Token.IsCancellationRequested)
+			{
+				CalculNext();
+				UpdateState();
+				await Task.Delay(100);
+			}
+		});
+	}
+
+}

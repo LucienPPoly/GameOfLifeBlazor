@@ -1,0 +1,121 @@
+﻿<div class="cell" @onclick="click" style="background-color:rgb(@r,@g,@b);aspect-ratio:1/1;min-height:10px;border:solid 1px grey;"></div>
+
+@code {
+    int r = 255;
+    int g = 255;
+    int b = 255;
+
+    public Cell()
+    {
+        isAlive = false;
+        willLive = false;
+    }
+
+    public bool isAlive { get; set; }
+    public bool willLive { get; set; }
+
+
+	[Parameter]
+	public int i { get; set; }
+
+	[Parameter]
+	public int j { get; set; }
+
+	public void click()
+	{
+		isAlive = !isAlive;
+		if (isAlive)
+		{
+			r = 0;
+			g = 0;
+			b = 0;
+		}else
+		{
+			r = 255;
+			g = 255;
+			b = 255;
+		}
+
+	}
+
+	public void setLifeState(bool state)
+	{
+		this.isAlive = state;
+		if (isAlive)
+		{
+			r = 0;
+			g = 0;
+			b = 0;
+		}
+		else
+		{
+			r = 255;
+			g = 255;
+			b = 255;
+		}
+        StateHasChanged();
+	}
+
+	public void setDead()
+	{
+		isAlive = false;
+        r = 255;
+        g = 255;
+        b = 255;
+        StateHasChanged();
+	}
+
+    public int calculateNeighbours(Cell[,] grille)
+    {
+        int n = 0;
+        for (int l = -1; l < 2; l++)
+        {
+            for (int c = -1; c < 2; c++)
+            {
+                if (grille[i + l, j + c].isAlive)
+                {
+                    if (l != 0 || c != 0) //On évite de compter la case elle-même
+                    {
+                        n++;
+                    }
+                }
+            }
+        }
+        return n;
+    }
+
+    public void calculatewillLive(Cell[,] grille)
+    {
+        if (i == 0 || j == 0 || i == 29 || j == 29)
+        {
+            willLive = false;
+        }
+        else
+        {
+            if (!this.isAlive && this.calculateNeighbours(grille) == 3)
+            {
+                this.willLive = true;
+            }
+            else
+            {
+                switch (this.calculateNeighbours(grille))
+                {
+
+                    default:
+                        this.willLive = this.isAlive;
+                        break;
+
+                    case < 2:
+                        this.willLive = false;
+                        break;
+
+                    case > 3:
+                        this.willLive = false;
+                        break;
+                }
+            }
+        }
+    }
+
+    public void nextStep() => setLifeState(this.willLive);
+}
